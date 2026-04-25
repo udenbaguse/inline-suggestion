@@ -1,0 +1,32 @@
+{
+  "name": "inline-suggestion-local-dev",
+  "displayName": "Inline Suggestion (Local AI)",
+  "description": "VS Code inline suggestions using @syamaitech/inline-suggestion.",
+  "version": "0.1.0",
+  "publisher": "local-dev",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "keybindings": [
+      {
+        "key": "tab",
+        "command": "editor.action.inlineSuggest.commit",
+        "when": "inlineSuggestionVisible && textInputFocus && !editorReadonly"
+      }
+    ]
+  },
+  "scripts": {
+    "test": "echo \"No tests\""
+  },
+  "dependencies": {
+    "@syamaitech/inline-suggestion": "file:.."
+  }
+}
