@@ -8,13 +8,13 @@ function sleep(ms) {
 /**
  * Get a local code suggestion only when offline.
  * @param {string} inputCode
- * @param {{ onOnline?: (message: string) => void }} [options]
+ * @param {{ onOnline?: (message: string) => void, allowWhenOnline?: boolean }} [options]
  * @returns {Promise<string | null>}
  */
 export async function getCodeSuggestion(inputCode, options = {}) {
-  const { onOnline } = options;
+  const { onOnline, allowWhenOnline = false } = options;
   const hasInternet = await checkInternetConnection();
-  if (hasInternet) {
+  if (hasInternet && !allowWhenOnline) {
     if (typeof onOnline === 'function') {
       onOnline('Internet connection detected. Local suggestion is disabled.');
     }
@@ -32,11 +32,11 @@ export async function getCodeSuggestion(inputCode, options = {}) {
 /**
  * Create a debounced suggester for editor integrations.
  * Call `suggest(inputCode)` on each typing update.
- * @param {{ delayMs?: number, onOnline?: (message: string) => void }} [options]
+ * @param {{ delayMs?: number, onOnline?: (message: string) => void, allowWhenOnline?: boolean }} [options]
  * @returns {{ suggest: (inputCode: string) => Promise<string | null> }}
  */
 export function createDebouncedSuggester(options = {}) {
-  const { delayMs = 500, onOnline } = options;
+  const { delayMs = 500, onOnline, allowWhenOnline = false } = options;
   let activeRequest = 0;
 
   return {
@@ -44,7 +44,7 @@ export function createDebouncedSuggester(options = {}) {
       const requestId = ++activeRequest;
       await sleep(delayMs);
       if (requestId !== activeRequest) return null;
-      return getCodeSuggestion(inputCode, { onOnline });
+      return getCodeSuggestion(inputCode, { onOnline, allowWhenOnline });
     }
   };
 }

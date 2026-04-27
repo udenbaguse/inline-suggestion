@@ -1,10 +1,23 @@
 import { pipeline, env } from '@xenova/transformers';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
 const MODEL_ID = 'Xenova/codegen-350M-mono';
 const REMOTE_HOSTS = ['https://huggingface.co/', 'https://hf-mirror.com/'];
+const CACHE_DIR =
+  process.env.INLINE_SUGGESTION_CACHE_DIR ||
+  path.join(os.homedir(), '.inline-suggestion-cache', 'transformers');
+const LOCAL_MODEL_ONNX = path.join(
+  CACHE_DIR,
+  'Xenova',
+  'codegen-350M-mono',
+  'onnx',
+  'decoder_model_merged_quantized.onnx'
+);
 
 // Runtime config for model loading and caching.
-env.cacheDir = './node_modules/.cache/transformers';
+env.cacheDir = CACHE_DIR;
 env.allowLocalModels = true;
 env.allowRemoteModels = true;
 env.progress_bar = true;
@@ -25,6 +38,16 @@ function formatError(error) {
  */
 export async function initializeCodeModel() {
   if (codeGenerator) return codeGenerator;
+
+  // If local model cache exists, force offline loading and avoid DNS/network errors.
+  if (fs.existsSync(LOCAL_MODEL_ONNX)) {
+    env.allowRemoteModels = false;
+    codeGenerator = await pipeline('text-generation', MODEL_ID, {
+      quantized: true,
+      device: 'auto'
+    });
+    return codeGenerator;
+  }
 
   const attemptErrors = [];
 
