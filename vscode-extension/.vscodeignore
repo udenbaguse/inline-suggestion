@@ -1,0 +1,14 @@
+**/.git/**
+**/.github/**
+**/.vscode/**
+**/.DS_Store
+**/Thumbs.db
+**/*.vsix
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+test/**
+tests/**
+coverage/**
